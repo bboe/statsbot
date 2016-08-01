@@ -19,6 +19,7 @@ class Bot(object):
 
     """
 
+    FLAIR_IN_PROGRESS = 'IN PROGRESS'
     FLAIR_INVALID = 'UNSATISFIABLE'
     FLAIR_SATISFIED = 'SATISFIED'
     FLAIR_STATS = 'STATS'
@@ -120,6 +121,7 @@ similar issue does not already exist. Thanks!
     def _run_subreddit_stats(self, submission, subreddit, view, commenters,
                              submitters):
         logger.info('RUNNING: {} {}'.format(subreddit, view))
+        self.subreddit.flair.set(submission, self.FLAIR_IN_PROGRESS)
         stats = SubredditStats(subreddit, site=self.site, distinguished=False)
         stats.submit_subreddit = self.subreddit
         result = stats.run(view, int(submitters) if submitters else 10,

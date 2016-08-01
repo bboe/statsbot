@@ -24,7 +24,7 @@ class Bot(object):
     FLAIR_STATS = 'STATS'
     FLAIR_UNKNOWN = 'OTHER'
 
-    INVALID_MESSAGE = """Oops! Your request cannot be satisifed due to
+    INVALID_MESSAGE = """Oops! Your request cannot be satisfied due to
 unrecognized syntax. Please ensure your title is of the following format and
 try again:
 
@@ -127,7 +127,7 @@ similar issue does not already exist. Thanks!
         self.subreddit.flair.set(result, self.FLAIR_STATS)
         self.subreddit.flair.set(submission, self.FLAIR_SATISFIED)
         self._safe_reply(submission,
-                         'Request satisifed: {}'.format(result.permalink))
+                         'Request satisfied: {}'.format(result.permalink))
 
     def _safe_reply(self, submission, message):
         permalink = self._permalink(submission)

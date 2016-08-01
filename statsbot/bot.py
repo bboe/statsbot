@@ -17,9 +17,19 @@ class Bot(object):
         """
         self.subreddit = subreddit
 
+    def _process_based_on_title(self, submission):
+        print(submission.title)
+        lower_title = submission.title.lower()
+        if lower_title.startswith('[request]'):
+            print('  request')
+        elif lower_title.startswith('subreddit stats:'):
+            print('  stats')
+        else:
+            print('  unknown')
+
     def run(self):
         """Run the bot indefinitely."""
         for submission in self.subreddit.stream.submissions():
             if submission.link_flair_text:
                 continue
-            print(submission.title)
+            self._process_based_on_title(submission)

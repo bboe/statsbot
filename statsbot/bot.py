@@ -1,5 +1,4 @@
 """statsbot.bot module."""
-import logging
 
 
 class Bot(object):
@@ -11,7 +10,7 @@ class Bot(object):
 
     """
 
-    def __init__(self, subreddit, log_level):
+    def __init__(self, subreddit):
         """Initialize an instance of Bot.
 
         :param subreddit: The subreddit to monitor for new submissions.
@@ -21,4 +20,6 @@ class Bot(object):
     def run(self):
         """Run the bot indefinitely."""
         for submission in self.subreddit.stream.submissions():
-            print(submission)
+            if submission.link_flair_text:
+                continue
+            print(submission.title)

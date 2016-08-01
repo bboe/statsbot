@@ -2,6 +2,7 @@
 
 Usage:
   statsbot help <command>
+  statsbot run
   statsbot unlabeled
 
 Options:
@@ -15,6 +16,7 @@ import sys
 from docopt import docopt
 import praw
 
+from .bot import Bot
 from .const import __version__
 
 
@@ -29,6 +31,14 @@ def command_help(command, available_commands):
     print('Help for command {}:\n'.format(command))
     print(available_commands[command].__doc__)
     return 0
+
+
+def command_run(subreddit, _):
+    """Run the statsbot indefinitely.
+
+    Usage: statsbot run
+    """
+    return Bot(subreddit).run()
 
 
 def command_unlabeled(subreddit, _):
@@ -48,7 +58,8 @@ def main():
     """Provide the entry point to the statsbot command."""
     args = docopt(__doc__, version='statsbot v{}'.format(__version__))
 
-    commands = {'help': command_help, 'unlabeled': command_unlabeled}
+    commands = {'help': command_help, 'run': command_run,
+                'unlabeled': command_unlabeled}
 
     if args['help']:
         return command_help(args['<command>'], commands)
@@ -59,4 +70,5 @@ def main():
     for command in commands:
         if args[command]:
             return commands[command](subreddit, args)
+    print('Oops, that command does not appear to be supported.')
     return 1

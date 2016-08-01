@@ -16,6 +16,7 @@ class Bot(object):
 
     """
 
+    FLAIR_STATS = 'STATS'
     FLAIR_UNKNOWN = 'OTHER'
 
     def __init__(self, subreddit):
@@ -24,6 +25,10 @@ class Bot(object):
         :param subreddit: The subreddit to monitor for new submissions.
         """
         self.subreddit = subreddit
+
+    def _handle_stats(self, submission):
+        logger.info('STATS: {}'.format(self._permalink(submission)))
+        self.subreddit.flair.set(submission, self.FLAIR_STATS)
 
     def _handle_unknown(self, submission):
         logger.info('UNKNOWN: {}'.format(self._permalink(submission)))
@@ -40,7 +45,7 @@ class Bot(object):
         if lower_title.startswith('[request]'):
             logger.info('REQUEST')
         elif lower_title.startswith('subreddit stats:'):
-            logger.info('STATS')
+            self._handle_stats(submission)
         else:
             self._handle_unknown(submission)
 

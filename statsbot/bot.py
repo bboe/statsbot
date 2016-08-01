@@ -2,6 +2,7 @@
 import logging
 import re
 
+from prawcore.exceptions import RequestException
 from prawtools.stats import SubredditStats
 import praw.exceptions
 
@@ -34,6 +35,9 @@ Where `SUBREDDIT_NAME` is the name of the subreddit to run the stats on, and
 or _year_. When `VIEW` is a __number__, it number represents the number of past
 days to collect submissions for using the _new_ listing. Otherwise, `VIEW`
 represents the respective _top_ listing.
+
+Note: `SUBREDDIT_NAME` cannot be a special subreddit (e.g., all) and must be
+accessible to the redditor from whom this message originates.
 
 Examples:
 
@@ -71,6 +75,13 @@ similar issue does not already exist. Thanks!
         logger.debug('PARSING: {}'.format(submission.title))
         permalink = self._permalink(submission)
         params = self.parse_request_title(submission.title)
+
+        if params:  # validate subreddit
+            try:
+                self.subreddit._reddit.subreddit(params['subreddit']).name
+            except (praw.exceptions.APIException, RequestException):
+                params = None
+
         if params is None:
             logger.info('INVALID: {}'.format(permalink))
             self.subreddit.flair.set(submission, self.FLAIR_INVALID)

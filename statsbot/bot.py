@@ -2,6 +2,7 @@
 import logging
 import re
 
+from prawtools.stats import SubredditStats
 import praw.exceptions
 
 
@@ -18,6 +19,7 @@ class Bot(object):
     """
 
     FLAIR_INVALID = 'UNSATISFIABLE'
+    FLAIR_SATISFIED = 'SATISFIED'
     FLAIR_STATS = 'STATS'
     FLAIR_UNKNOWN = 'OTHER'
 
@@ -56,11 +58,13 @@ similar issue does not already exist. Thanks!
         match = cls.RE_REQUEST.match(title)
         return match.groupdict() if match else None
 
-    def __init__(self, subreddit):
+    def __init__(self, subreddit, site):
         """Initialize an instance of Bot.
 
         :param subreddit: The subreddit to monitor for new submissions.
+        :param site: The site name used to initialize subreddit_stats.
         """
+        self.site = site
         self.subreddit = subreddit
 
     def _handle_request(self, submission):
@@ -71,6 +75,9 @@ similar issue does not already exist. Thanks!
             logger.info('INVALID: {}'.format(permalink))
             self.subreddit.flair.set(submission, self.FLAIR_INVALID)
             self._safe_reply(submission, self.INVALID_MESSAGE)
+        else:
+            self._run_subreddit_stats(submission, params['subreddit'],
+                                      params['view'].lower())
 
     def _handle_stats(self, submission):
         logger.info('STATS: {}'.format(self._permalink(submission)))
@@ -94,6 +101,16 @@ similar issue does not already exist. Thanks!
             self._handle_stats(submission)
         else:
             self._handle_unknown(submission)
+
+    def _run_subreddit_stats(self, submission, subreddit, view):
+        logger.info('RUNNING: {} {}'.format(subreddit, view))
+        stats = SubredditStats(subreddit, site=self.site, distinguished=False)
+        stats.submit_subreddit = self.subreddit
+        result = stats.run(view, 10, 10)
+        self.subreddit.flair.set(result, self.FLAIR_STATS)
+        self.subreddit.flair.set(submission, self.FLAIR_SATISFIED)
+        self._safe_reply(submission,
+                         'Request satisifed: {}'.format(result.permalink))
 
     def _safe_reply(self, submission, message):
         permalink = self._permalink(submission)

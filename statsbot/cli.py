@@ -39,12 +39,12 @@ def command_help(command, available_commands):
     return 0
 
 
-def command_run(subreddit, _):
+def command_run(subreddit, args):
     """Run the statsbot indefinitely.
 
     Usage: statsbot run
     """
-    return Bot(subreddit).run()
+    return Bot(subreddit, site=args['--site']).run()
 
 
 def command_unlabeled(subreddit, _):

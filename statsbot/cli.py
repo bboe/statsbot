@@ -2,12 +2,16 @@
 
 Usage:
   statsbot help <command>
-  statsbot run
-  statsbot unlabeled
+  statsbot [options] run
+  statsbot [options] unlabeled
 
 Options:
-  -h --help  Output this message.
-  --version  Output statsbot's version string.
+  -S <site> --site=<site>       Site name in praw.ini
+                                [default: subreddit_stats].
+  -s <name> --subreddit=<name>  The name of the subreddit to monitor for stats
+                                requests [default: subreddit_stats].
+  -h --help                     Output this message.
+  --version                     Output statsbot's version string.
 
 """
 from __future__ import print_function
@@ -64,9 +68,9 @@ def main():
     if args['help']:
         return command_help(args['<command>'], commands)
 
-    reddit = praw.Reddit('subreddit_stats',
+    reddit = praw.Reddit(args['--site'],
                          user_agent='statsbot/{}'.format(__version__))
-    subreddit = reddit.subreddit('subreddit_stats')
+    subreddit = reddit.subreddit(args['--subreddit'])
     for command in commands:
         if args[command]:
             return commands[command](subreddit, args)

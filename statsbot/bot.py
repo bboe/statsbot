@@ -29,7 +29,11 @@ class Bot(object):
 
     def run(self):
         """Run the bot indefinitely."""
-        for submission in self.subreddit.stream.submissions():
-            if submission.link_flair_text:
-                continue
-            self._process_based_on_title(submission)
+        try:
+            for submission in self.subreddit.stream.submissions():
+                if submission.link_flair_text:
+                    continue
+                self._process_based_on_title(submission)
+        except KeyboardInterrupt:
+            print('\nTermination received. Goodbye!')
+        return 0

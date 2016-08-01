@@ -11,6 +11,7 @@ Options:
   -s <name> --subreddit=<name>  The name of the subreddit to monitor for stats
                                 requests [default: subreddit_stats].
   -h --help                     Output this message.
+  -D --debug                    Show debugging messages.
   --version                     Output statsbot's version string.
 
 """
@@ -22,6 +23,7 @@ import praw
 
 from .bot import Bot
 from .const import __version__
+from .util import prepare_logger
 
 
 def command_help(command, available_commands):
@@ -61,6 +63,7 @@ def command_unlabeled(subreddit, _):
 def main():
     """Provide the entry point to the statsbot command."""
     args = docopt(__doc__, version='statsbot v{}'.format(__version__))
+    prepare_logger('DEBUG' if args['--debug'] else 'INFO')
 
     commands = {'help': command_help, 'run': command_run,
                 'unlabeled': command_unlabeled}

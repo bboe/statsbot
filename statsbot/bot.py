@@ -1,5 +1,10 @@
 """statsbot.bot module."""
+import logging
+
 import praw.exceptions
+
+
+logger = logging.getLogger(__package__)
 
 
 class Bot(object):
@@ -21,31 +26,34 @@ class Bot(object):
         self.subreddit = subreddit
 
     def _handle_unknown(self, submission):
+        logger.info('UNKNOWN: {}'.format(self._permalink(submission)))
         self.subreddit.flair.set(submission, self.FLAIR_UNKNOWN)
         self._safe_reply(submission,
                          'This does not appear to be a valid request.')
-        print('UNKNOWN: {}'.format(self._permalink(submission)))
 
     def _permalink(self, submission):
         return 'https://www.reddit.com{}'.format(submission.permalink)
 
     def _process_based_on_title(self, submission):
-        print(submission.title)
+        logger.debug('FOUND: {}'.format(submission.title))
         lower_title = submission.title.lower()
         if lower_title.startswith('[request]'):
-            print('  request')
+            logger.info('REQUEST')
         elif lower_title.startswith('subreddit stats:'):
-            print('  stats')
+            logger.info('STATS')
         else:
             self._handle_unknown(submission)
 
     def _safe_reply(self, submission, message):
+        permalink = self._permalink(submission)
         try:
             submission.reply(message)
         except praw.exceptions.APIException as exc:
             if exc.error_type != 'TOO_OLD':
                 raise
+            logger.info('REPLY FAIL: {} {}'.format(exc.error_type, permalink))
             return False
+        logger.debug('REPLIED TO: {}'.format(permalink))
         return True
 
     def run(self):
@@ -56,5 +64,5 @@ class Bot(object):
                     continue
                 self._process_based_on_title(submission)
         except KeyboardInterrupt:
-            print('\nTermination received. Goodbye!')
+            logger.info('Termination received. Goodbye!')
         return 0

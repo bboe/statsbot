@@ -1,3 +1,3 @@
 """statsbot.const module."""
 
-__version__ = '0.1a0'
+__version__ = '0.1'

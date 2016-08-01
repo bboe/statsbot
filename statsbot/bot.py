@@ -53,7 +53,9 @@ similar issue does not already exist. Thanks!
 """
 
     RE_REQUEST = re.compile(r'^\[request\] (?:/?r/)?(?P<subreddit>\w+) '
-                            r'(?P<view>\d+|all|day|hour|month|week|year)$',
+                            r'(?P<view>\d+|all|day|hour|month|week|year)'
+                            r'(?: -c ?(?P<commenters>\d+))?'
+                            r'(?: -s ?(?P<submitters>\d+))?$',
                             re.IGNORECASE)
 
     @classmethod
@@ -88,7 +90,9 @@ similar issue does not already exist. Thanks!
             self._safe_reply(submission, self.INVALID_MESSAGE)
         else:
             self._run_subreddit_stats(submission, params['subreddit'],
-                                      params['view'].lower())
+                                      params['view'].lower(),
+                                      params['commenters'],
+                                      params['submitters'])
 
     def _handle_stats(self, submission):
         logger.info('STATS: {}'.format(self._permalink(submission)))
@@ -113,11 +117,13 @@ similar issue does not already exist. Thanks!
         else:
             self._handle_unknown(submission)
 
-    def _run_subreddit_stats(self, submission, subreddit, view):
+    def _run_subreddit_stats(self, submission, subreddit, view, commenters,
+                             submitters):
         logger.info('RUNNING: {} {}'.format(subreddit, view))
         stats = SubredditStats(subreddit, site=self.site, distinguished=False)
         stats.submit_subreddit = self.subreddit
-        result = stats.run(view, 10, 10)
+        result = stats.run(view, int(submitters) if submitters else 10,
+                           int(commenters) if commenters else 10)
         self.subreddit.flair.set(result, self.FLAIR_STATS)
         self.subreddit.flair.set(submission, self.FLAIR_SATISFIED)
         self._safe_reply(submission,

@@ -1,4 +1,5 @@
 """statsbot.bot module."""
+import praw.exceptions
 
 
 class Bot(object):
@@ -10,12 +11,23 @@ class Bot(object):
 
     """
 
+    FLAIR_UNKNOWN = 'OTHER'
+
     def __init__(self, subreddit):
         """Initialize an instance of Bot.
 
         :param subreddit: The subreddit to monitor for new submissions.
         """
         self.subreddit = subreddit
+
+    def _handle_unknown(self, submission):
+        self.subreddit.flair.set(submission, self.FLAIR_UNKNOWN)
+        self._safe_reply(submission,
+                         'This does not appear to be a valid request.')
+        print('UNKNOWN: {}'.format(self._permalink(submission)))
+
+    def _permalink(self, submission):
+        return 'https://www.reddit.com{}'.format(submission.permalink)
 
     def _process_based_on_title(self, submission):
         print(submission.title)
@@ -25,7 +37,16 @@ class Bot(object):
         elif lower_title.startswith('subreddit stats:'):
             print('  stats')
         else:
-            print('  unknown')
+            self._handle_unknown(submission)
+
+    def _safe_reply(self, submission, message):
+        try:
+            submission.reply(message)
+        except praw.exceptions.APIException as exc:
+            if exc.error_type != 'TOO_OLD':
+                raise
+            return False
+        return True
 
     def run(self):
         """Run the bot indefinitely."""

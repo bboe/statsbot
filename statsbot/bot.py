@@ -145,11 +145,16 @@ similar issue does not already exist. Thanks!
 
     def run(self):
         """Run the bot indefinitely."""
-        try:
-            for submission in self.subreddit.stream.submissions():
-                if submission.link_flair_text:
-                    continue
-                self._process_based_on_title(submission)
-        except KeyboardInterrupt:
-            logger.info('Termination received. Goodbye!')
+        running = True
+        while running:
+            try:
+                for submission in self.subreddit.stream.submissions():
+                    if submission.link_flair_text:
+                        continue
+                    self._process_based_on_title(submission)
+            except KeyboardInterrupt:
+                logger.info('Termination received. Goodbye!')
+                running = False
+            except RequestException:
+                logger.exception('run loop')
         return 0

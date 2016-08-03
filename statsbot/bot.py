@@ -19,6 +19,7 @@ class Bot(object):
 
     """
 
+    FLAIR_EXCEPTION = 'BUG'
     FLAIR_IN_PROGRESS = 'IN PROGRESS'
     FLAIR_INVALID = 'UNSATISFIABLE'
     FLAIR_SATISFIED = 'SATISFIED'
@@ -126,10 +127,16 @@ similar issue does not already exist. Thanks!
         stats.submit_subreddit = self.subreddit
         result = stats.run(view, int(submitters) if submitters else 10,
                            int(commenters) if commenters else 10)
-        self.subreddit.flair.set(result, self.FLAIR_STATS)
-        self.subreddit.flair.set(submission, self.FLAIR_SATISFIED)
-        self._safe_reply(submission,
-                         'Request satisfied: {}'.format(result.permalink))
+        if result is None:
+            flair = self.FLAIR_EXCEPTION
+            reply = ('An issue occurred handling this request. '
+                     'Please fix me /u/bboe.')
+        else:
+            self.subreddit.flair.set(result, self.FLAIR_STATS)
+            flair = self.FLAIR_SATISFIED
+            reply = 'Request satisfied: {}'.format(result.permalink)
+        self._safe_reply(submission, reply)
+        self.subreddit.flair.set(submission, flair)
 
     def _safe_reply(self, submission, message):
         permalink = self._permalink(submission)
@@ -145,11 +152,16 @@ similar issue does not already exist. Thanks!
 
     def run(self):
         """Run the bot indefinitely."""
-        try:
-            for submission in self.subreddit.stream.submissions():
-                if submission.link_flair_text:
-                    continue
-                self._process_based_on_title(submission)
-        except KeyboardInterrupt:
-            logger.info('Termination received. Goodbye!')
+        running = True
+        while running:
+            try:
+                for submission in self.subreddit.stream.submissions():
+                    if submission.link_flair_text:
+                        continue
+                    self._process_based_on_title(submission)
+            except KeyboardInterrupt:
+                logger.info('Termination received. Goodbye!')
+                running = False
+            except RequestException:
+                logger.exception('run loop')
         return 0

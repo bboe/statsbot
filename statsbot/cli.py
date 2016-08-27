@@ -19,6 +19,7 @@ from __future__ import print_function
 import sys
 
 from docopt import docopt
+from update_checker import update_check
 import praw
 
 from .bot import Bot
@@ -71,7 +72,9 @@ def main():
     if args['help']:
         return command_help(args['<command>'], commands)
 
-    reddit = praw.Reddit(args['--site'],
+    update_check(__package__, __version__)
+
+    reddit = praw.Reddit(args['--site'], check_for_updates=False,
                          user_agent='statsbot/{}'.format(__version__))
     subreddit = reddit.subreddit(args['--subreddit'])
     for command in commands:

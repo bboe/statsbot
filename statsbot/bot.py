@@ -2,7 +2,7 @@
 import logging
 import re
 
-from prawcore.exceptions import RequestException
+from prawcore.exceptions import PrawcoreException
 from prawtools.stats import SubredditStats
 import praw.exceptions
 
@@ -83,7 +83,7 @@ similar issue does not already exist. Thanks!
         if params:  # validate subreddit
             try:
                 self.subreddit._reddit.subreddit(params['subreddit']).name
-            except (praw.exceptions.APIException, RequestException):
+            except (praw.exceptions.APIException, PrawcoreException):
                 params = None
 
         if params is None:
@@ -162,6 +162,6 @@ similar issue does not already exist. Thanks!
             except KeyboardInterrupt:
                 logger.info('Termination received. Goodbye!')
                 running = False
-            except RequestException:
+            except PrawcoreException:
                 logger.exception('run loop')
         return 0

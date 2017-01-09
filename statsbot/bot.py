@@ -124,6 +124,8 @@ similar issue does not already exist. Thanks!
                              submitters):
         logger.info('RUNNING: {} {}'.format(subreddit, view))
         submission.mod.flair(self.FLAIR_IN_PROGRESS)
+        if subreddit.over18:
+            submission.mod.nsfw()
         stats = SubredditStats(str(subreddit), site=self.site,
                                distinguished=False)
         stats.submit_subreddit = self.subreddit
@@ -137,6 +139,8 @@ similar issue does not already exist. Thanks!
             result.mod.flair(self.FLAIR_STATS)
             flair = self.FLAIR_SATISFIED
             reply = 'Request satisfied: {}'.format(result.permalink)
+        if subreddit.over18:
+            result.mod.nsfw()
         self._safe_reply(submission, reply)
         submission.mod.flair(flair)
 

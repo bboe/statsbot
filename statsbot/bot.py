@@ -81,8 +81,9 @@ similar issue does not already exist. Thanks!
         params = self.parse_request_title(submission.title)
 
         if params:  # validate subreddit
+            subreddit = self.subreddit._reddit.subreddit(params['subreddit'])
             try:
-                self.subreddit._reddit.subreddit(params['subreddit']).name
+                subreddit.name
             except (praw.exceptions.APIException, PrawcoreException):
                 params = None
 
@@ -91,7 +92,7 @@ similar issue does not already exist. Thanks!
             submission.mod.flair(self.FLAIR_INVALID)
             self._safe_reply(submission, self.INVALID_MESSAGE)
         else:
-            self._run_subreddit_stats(submission, params['subreddit'],
+            self._run_subreddit_stats(submission, subreddit,
                                       params['view'].lower(),
                                       params['commenters'],
                                       params['submitters'])
@@ -123,6 +124,8 @@ similar issue does not already exist. Thanks!
                              submitters):
         logger.info('RUNNING: {} {}'.format(subreddit, view))
         submission.mod.flair(self.FLAIR_IN_PROGRESS)
+        stats = SubredditStats(str(subreddit), site=self.site,
+                               distinguished=False)
         stats.submit_subreddit = self.subreddit
         result = stats.run(view, int(submitters) if submitters else 10,
                            int(commenters) if commenters else 10)

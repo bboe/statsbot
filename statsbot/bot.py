@@ -88,7 +88,7 @@ similar issue does not already exist. Thanks!
 
         if params is None:
             logger.info('INVALID: {}'.format(permalink))
-            self.subreddit.flair.set(submission, self.FLAIR_INVALID)
+            submission.mod.flair(self.FLAIR_INVALID)
             self._safe_reply(submission, self.INVALID_MESSAGE)
         else:
             self._run_subreddit_stats(submission, params['subreddit'],
@@ -98,11 +98,11 @@ similar issue does not already exist. Thanks!
 
     def _handle_stats(self, submission):
         logger.info('STATS: {}'.format(self._permalink(submission)))
-        self.subreddit.flair.set(submission, self.FLAIR_STATS)
+        submission.mod.flair(self.FLAIR_STATS)
 
     def _handle_unknown(self, submission):
         logger.info('UNKNOWN: {}'.format(self._permalink(submission)))
-        self.subreddit.flair.set(submission, self.FLAIR_UNKNOWN)
+        submission.mod.flair(self.FLAIR_UNKNOWN)
         self._safe_reply(submission,
                          'This does not appear to be a valid request.')
 
@@ -122,8 +122,7 @@ similar issue does not already exist. Thanks!
     def _run_subreddit_stats(self, submission, subreddit, view, commenters,
                              submitters):
         logger.info('RUNNING: {} {}'.format(subreddit, view))
-        self.subreddit.flair.set(submission, self.FLAIR_IN_PROGRESS)
-        stats = SubredditStats(subreddit, site=self.site, distinguished=False)
+        submission.mod.flair(self.FLAIR_IN_PROGRESS)
         stats.submit_subreddit = self.subreddit
         result = stats.run(view, int(submitters) if submitters else 10,
                            int(commenters) if commenters else 10)
@@ -132,11 +131,11 @@ similar issue does not already exist. Thanks!
             reply = ('An issue occurred handling this request. '
                      'Please fix me /u/bboe.')
         else:
-            self.subreddit.flair.set(result, self.FLAIR_STATS)
+            result.mod.flair(self.FLAIR_STATS)
             flair = self.FLAIR_SATISFIED
             reply = 'Request satisfied: {}'.format(result.permalink)
         self._safe_reply(submission, reply)
-        self.subreddit.flair.set(submission, flair)
+        submission.mod.flair(flair)
 
     def _safe_reply(self, submission, message):
         permalink = self._permalink(submission)

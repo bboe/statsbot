@@ -165,6 +165,9 @@ similar issue does not already exist. Thanks!
                     if submission.link_flair_text:
                         continue
                     self._process_based_on_title(submission)
+                print('Stream ended. It should not do that! '
+                      'See: https://redd.it/5nrfdf')
+                return 1
             except KeyboardInterrupt:
                 logger.info('Termination received. Goodbye!')
                 running = False

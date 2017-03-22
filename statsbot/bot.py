@@ -1,6 +1,7 @@
 """statsbot.bot module."""
 import logging
 import re
+import time
 
 from prawcore.exceptions import PrawcoreException
 from prawtools.stats import SubredditStats
@@ -170,4 +171,5 @@ similar issue does not already exist. Thanks!
                 running = False
             except PrawcoreException:
                 logger.exception('run loop')
+                time.sleep(10)
         return 0

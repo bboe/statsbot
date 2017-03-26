@@ -128,7 +128,7 @@ similar issue does not already exist. Thanks!
         if subreddit.over18:
             submission.mod.nsfw()
         stats = SubredditStats(str(subreddit), site=self.site,
-                               distinguished=False)
+                               distinguished=False, reddit=subreddit._reddit)
         stats.submit_subreddit = self.subreddit
         result = stats.run(view, int(submitters) if submitters else 10,
                            int(commenters) if commenters else 10)
